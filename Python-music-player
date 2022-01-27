@@ -1,0 +1,196 @@
+def unmutemusic():
+    global currentvol
+    root.unmutebutton.grid_remove()
+    root.mutebutton.grid()
+    mixer.music.set_volume(currentvol)
+
+def mutemusic():
+    global currentvol
+    root.mutebutton.grid_remove()
+    root.unmutebutton.grid()
+    currentvol=mixer.music.get_volume()
+    mixer.music.set_volume(0)
+
+def resumemusic():
+    root.ResumeButton.grid_remove()
+    root.PauseButton.grid()
+    mixer.music.unpause()
+    AudioStatusLabel.configure(text="Playing.....")
+
+def volumeup():
+    vol = mixer.music.get_volume()
+    if(vol>=vol*100):
+        mixer.music.set_volume(vol + 0.01)
+    else:
+        mixer.music.set_volume(vol + 0.05)
+    ProgressbarVolumeLabel.configure(text="{}%".format(int(mixer.music.get_volume()*100)))
+    ProgressbarVolume["value"]=mixer.music.get_volume()*100
+
+
+def volumedown():
+    vol = mixer.music.get_volume()
+    if (vol <= vol * 100):
+        mixer.music.set_volume(vol - 0.01)
+    else:
+        mixer.music.set_volume(vol + 0.05)
+    ProgressbarVolumeLabel.configure(text="{}%".format(int(mixer.music.get_volume() * 100)))
+    ProgressbarVolume["value"] = mixer.music.get_volume() * 100
+
+def stopmusic():
+    mixer.music.stop()
+    AudioStatusLabel.configure(text="Stopped.....")
+
+def pausemusic():
+    mixer.music.pause()
+    root.PauseButton.grid_remove()
+    root.ResumeButton.grid()
+    AudioStatusLabel.configure(text="Paused.....")
+
+def playmusic():
+    ad = audiotrack.get()
+    mixer.music.load(ad)
+    ProgressbarLabel.grid()
+    ProgressbarMusicLabel.grid()
+    mixer.music.set_volume(0.4)
+    ProgressbarVolume["value"]=40
+    ProgressbarVolumeLabel["text"]="40%"
+    mixer.music.play()
+    AudioStatusLabel.configure(text="Playing.....")
+    Song=MP3(ad)
+    totalsonglength=int(Song.info.length)
+    ProgressbarMusic["maximum"]=totalsonglength
+    ProgressbarMusicEndTimeLabel.configure(text="{}".format(str(datetime.timedelta(seconds=totalsonglength))))
+    def Progressbarmusictick():
+        CurrentSongLength=mixer.music.get_pos()//1000
+        ProgressbarMusic["value"]=CurrentSongLength
+        ProgressbarMusicStartTimeLabel.configure(text="{}".format(str(datetime.timedelta(seconds=CurrentSongLength))))
+        ProgressbarMusic.after(2,Progressbarmusictick)
+    Progressbarmusictick()
+
+
+
+def musicurl():
+    dd = filedialog.askopenfilename()
+    audiotrack.set(dd)
+
+def createwidthes():
+    global AudioStatusLabel,Progressbar,ProgressbarVolumeLabel,ProgressbarLabel,ProgressbarVolume,ProgressbarMusicLabel,ProgressbarMusic,ProgressbarMusicEndTimeLabel,ProgressbarMusicStartTimeLabel
+    TrackLabel = Label(root, text="Select Audio Track : ", font=("Montserrat", 15, "italic bold"))
+    TrackLabel.grid(row=0, column=0, padx=50, pady=40)
+
+    AudioStatusLabel = Label(root,text=" ",bg="cyan2",font=("Montserrat", 15, "italic bold"),width=10)
+    AudioStatusLabel.grid(row=2,column=1)
+
+    TrackLabelEntry = Entry(root, font=("Montserrat", 15, "italic bold"), width="39", textvariable=audiotrack)
+    TrackLabelEntry.grid(row=0, column=1)
+
+    BrowseButton = Button(root, text="Search", bg="yellow2", font=("Montserrat", 10, "italic bold"), width=20, bd=5,
+                          activebackground="skyblue", command=musicurl)
+    BrowseButton.grid(row=0, column=2, padx=40, pady=40)
+
+    PlayButton = Button(root, text="Play", bg="royalblue4", font=("Montserrat", 10, "italic bold"), width=20, bd=5,
+                        activebackground="skyblue", command=playmusic)
+    PlayButton.grid(row=1, column=0, padx=40, pady=40)
+
+    root.PauseButton = Button(root, text="Pause", bg="tan1", font=("Montserrat", 10, "italic bold"), width=20, bd=5,
+                         activebackground="skyblue", command=pausemusic)
+    root.PauseButton.grid(row=1, column=1, padx=40, pady=40)
+
+    root.ResumeButton = Button(root, text="Resume", bg="tan1", font=("Montserrat", 10, "italic bold"), width=20, bd=5,
+                         activebackground="skyblue",command=resumemusic)
+    root.ResumeButton.grid(row=1, column=1, padx=40, pady=40)
+    root.ResumeButton.grid_remove()
+
+    root.mutebutton=Button(root,text="Mute",width=10,bg="yellow",activebackground="skyblue",bd=5, font=("Montserrat", 10, "italic bold"),command=mutemusic)
+    root.mutebutton.grid(row=3,column=3)
+
+    root.unmutebutton = Button(root, text="UnMute", width=10, bg="yellow", activebackground="skyblue", bd=5,
+                             font=("Montserrat", 10, "italic bold"),command=unmutemusic)
+    root.unmutebutton.grid(row=3, column=3)
+    root.unmutebutton.grid_remove()
+
+    VolumeupButton = Button(root, text="Volume up", bg="red2", font=("Montserrat", 10, "italic bold"), width=20, bd=5,
+                            activebackground="skyblue", command=volumeup)
+    VolumeupButton.grid(row=1, column=2, padx=40, pady=40)
+
+    StopButton = Button(root, text="Stop", bg="purple", font=("Montserrat", 10, "italic bold"), width=20, bd=5,
+                        activebackground="skyblue", command=stopmusic)
+    StopButton.grid(row=2, column=0, padx=40, pady=40)
+
+    VolumedownButton = Button(root, text="Volume down", bg="royalblue", font=("Montserrat", 10, "italic bold"),
+                              width=20, bd=5, activebackground="skyblue", command=volumedown)
+    VolumedownButton.grid(row=2, column=2, padx=40, pady=40)
+
+
+    ProgressbarLabel=Label(root,text=" ",bg="red")
+    ProgressbarLabel.grid(row=0,column=3,rowspan=3,pady=30)
+
+    ProgressbarVolume = Progressbar(ProgressbarLabel,orient=VERTICAL,mode="determinate",value=0,length=190)
+    ProgressbarVolume.grid(row=0,column=0,ipadx=5)
+
+    ProgressbarVolumeLabel=Label(ProgressbarLabel,text="0%",bg="lightgrey",width=3)
+    ProgressbarVolumeLabel.grid(row=0,column=0)
+
+
+    ProgressbarMusicLabel=Label(root,text=" ",bg="red")
+    ProgressbarMusicLabel.grid(row=3,column=0,columnspan=3,padx=20,pady=20)
+    ProgressbarMusicLabel.grid_remove()
+
+    ProgressbarMusicStartTimeLabel=Label(ProgressbarMusicLabel,text="0:00:0 ",bg="red")
+    ProgressbarMusicStartTimeLabel.grid(row=0,column=0)
+
+    ProgressbarMusic = Progressbar(ProgressbarMusicLabel,orient=HORIZONTAL,mode="determinate",value=0)
+    ProgressbarMusic.grid(row=0,column=1,ipadx=370,ipady=3)
+
+
+    ProgressbarMusicEndTimeLabel = Label(ProgressbarMusicLabel, text="0:00:0 ", bg="red")
+    ProgressbarMusicEndTimeLabel.grid(row=0, column=2)
+
+
+    ProgressbarMusic=Progressbar(ProgressbarMusicLabel)
+
+
+from tkinter import *
+from tkinter import filedialog
+from pygame import mixer
+from tkinter.ttk import Progressbar
+import datetime
+from mutagen.mp3 import MP3
+root = Tk()
+root.geometry("1100x500+200+190")
+root.title("My Music player..")
+root.resizable(False, False)
+root.configure(bg="cyan2")
+
+audiotrack = StringVar()
+currentvol=0
+totalsonglength=0
+st = "Developed By PRAKHAR SHRIVASTAVA"
+count = 0
+text = ""
+SliderLabel = Label(root, text=st, bg=None, font=("Montserrat", 40, "italic bold"))
+SliderLabel.grid(row=4, column=0, padx=20, pady=20, columnspan=3)
+
+
+def IntroLabelTick():
+    global count, text
+    if (count >= len(st)):
+        count = -1
+        text = ""
+        SliderLabel.configure(text=text)
+    else:
+        text = text + st[count]
+        SliderLabel.configure(text=text)
+    count += 1
+    SliderLabel.after(200, IntroLabelTick)
+
+
+IntroLabelTick()
+mixer.init()
+createwidthes()
+root.mainloop()
+
+
+
+
+
